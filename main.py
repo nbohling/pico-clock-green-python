@@ -2,12 +2,13 @@ import time
 from scheduler import Scheduler
 from clock import Clock
 from apps import Apps
-from pomodoro import Pomodoro
+# from pomodoro import Pomodoro
 from time_set import TimeSet
+from baby_timer import BabyTimer
 
 APP_CLASSES = [
     Clock,
-    Pomodoro,
+    BabyTimer,
     TimeSet,
 ]
 
