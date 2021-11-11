@@ -31,18 +31,18 @@ class BabyTimer:
             BabyState.awake: 0,
             BabyState.asleep: 0
         }
-        self.last_reset_time = None
+        self.last_reset_time = time.time()
 
         self.enabled = False
         self.started = False
 
         # Callback that drives update
         scheduler.schedule("time-second", 1000, self.time_increment_callback)
-        self.buttons.add_callback(2, self.start_callback, max=500)
-        self.buttons.add_callback(3, self.stop_callback, max=500)
 
     def enable(self):
         self.enabled = True
+        self.buttons.add_callback(2, self.start_callback, max=500)
+        self.buttons.add_callback(3, self.stop_callback, max=500)
 
     def disable(self):
         self.enabled = False
@@ -60,32 +60,40 @@ class BabyTimer:
             self.update_display()
 
     # Runs when the start button is pressed
-    def start_callback(self):
+    def start_callback(self, t):
+        print("Start pressed")
         # If not enabled, don't do anything
         if not self.enabled:
             return None
 
         # Log time and switch state if already running
         if self.started:
-            self.total_duration[self.state] += _elapsed_time()
-            self.state = _next_state()
+            self.total_duration[self.state] += self._elapsed_time()
+            self.state = self._next_state()
 
         # Mark as started
         self.started = True
         self.last_reset_time = time.time()
 
-    def stop_callback(self):
+    def stop_callback(self, t):
+        print("Stop pressed")
         self.started = False
 
     def _elapsed_time(self):
-        return self.time() - self.last_reset_time
+        return time.time() - self.last_reset_time
 
     # Display current state and time
     def update_display(self):
-        current_duration = _elapsed_time()
-        t = self.state_string() + "%02d:%02d" % (current_duration //
+        current_duration = self._elapsed_time()
+        t = self.state_string() + "%01d:%02d" % (current_duration //
                                                  3600, (current_duration/60) % 60)
         self.display.show_text(t)
+        print(t)
 
     def state_string(self):
         return self.switcher.get(self.state)
+
+    def _next_state(self):
+        if self.state == BabyState.awake:
+            return BabyState.asleep
+        return BabyState.awake
