@@ -23,9 +23,15 @@ class BabyTimer:
         self.scheduler = scheduler
         self.buttons = Buttons()
 
-        self.switcher = {BabyState.awake: "*", BabyState.asleep: "-"}
+        self.switcher = {
+            BabyState.awake: "*",
+            BabyState.asleep: "-"
+        }
         self.state = BabyState.awake
-        self.total_duration = {BabyState.awake: 0, BabyState.asleep: 0}
+        self.total_duration = {
+            BabyState.awake: 0,
+            BabyState.asleep: 0
+        }
         self.last_reset_time = None
 
         self.enabled = False
@@ -34,7 +40,7 @@ class BabyTimer:
         # Callback that drives update
         scheduler.schedule("time-second", 1000, self.time_increment_callback)
         self.buttons.add_callback(2, self.start_callback, max=500)
-        # self.buttons.add_callback(3, self.stop_callback, max=500)
+        self.buttons.add_callback(3, self.stop_callback, max=500)
 
     def enable(self):
         self.enabled = True
@@ -52,12 +58,7 @@ class BabyTimer:
     # This simply updates the display
     def time_increment_callback(self, t):
         if self.enabled and self.started:
-            now = int(self._time_left())
-            t = "%02d:%02d" % (now // 60, now % 60)
-            self.display.show_text(t)
-            if now <= 0:
-                self.started = False
-                self.start_time = None
+            self.update_display()
 
     # Runs when the start button is pressed
     def start_callback(self):
@@ -74,15 +75,16 @@ class BabyTimer:
         self.started = True
         self.last_reset_time = time.time()
 
+    def stop_callback(self):
+        self.started = False
+
     def _elapsed_time(self):
         return self.time() - self.last_reset_time
 
     # Display current state and time
-    def display(self):
-        t = self.state_string() + "%02d:%02d" % (
-            self.current_duration // 3600,
-            (self.current_duration / 60) % 60,
-        )
+    def update_display(self):
+        t = self.state_string() + "%02d:%02d" % (self.current_duration //
+                                                 3600, (self.current_duration/60) % 60)
         self.display.show_text(t)
 
     def state_string(self):
