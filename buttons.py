@@ -29,6 +29,7 @@ class Buttons:
             self.callbacks = []
             self.pressed_time = None
 
+        # MIN/MAX specify the minimum and max button press length
         def add_callback(self, callback, min=0, max=-1):
             callback_obj = self.Callback(callback, min, max)
             self.callbacks.append(callback_obj)
@@ -51,6 +52,7 @@ class Buttons:
         self.buttons = [self.Button(number) for number in (1, 2, 3)]
         scheduler.schedule("button-press", 1, self.millis_callback)
 
+    # MIN/MAX specify the minimum and max button press length
     def add_callback(self, number, callback, min=0, max=-1):
         self.buttons[number - 1].add_callback(callback, min, max)
 
@@ -74,7 +76,8 @@ class Buttons:
                     tm = time.ticks_ms()
                     press_duration = time.ticks_diff(tm, button.pressed)
                     print(
-                        "Button %d pressed for %dms" % (button.number, press_duration)
+                        "Button %d pressed for %dms" % (
+                            button.number, press_duration)
                     )
                     for callback in button.callbacks:
                         if callback.min < press_duration and (

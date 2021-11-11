@@ -21,7 +21,8 @@ class Pomodoro:
 
     def enable(self):
         self.enabled = True
-        t = "%02d:%02d" % (self.pomodoro_duration // 60, self.pomodoro_duration % 60)
+        t = "%02d:%02d" % (self.pomodoro_duration // 60,
+                           self.pomodoro_duration % 60)
         self.display.show_text(t)
         self.buttons.add_callback(2, self.start_callback, max=500)
         self.buttons.add_callback(2, self.clear_callback, min=500)
@@ -61,7 +62,6 @@ class Pomodoro:
         if self.enabled and self.started:
             self.stop()
         else:
-            print("START POMODORO")
             self.start()
 
     def clear_callback(self, t):

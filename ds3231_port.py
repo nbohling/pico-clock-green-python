@@ -37,7 +37,8 @@ class DS3231:
         self.ds3231 = i2c
         self.timebuf = bytearray(7)
         if DS3231_I2C_ADDR not in self.ds3231.scan():
-            raise RuntimeError("DS3231 not found on I2C bus at %d" % DS3231_I2C_ADDR)
+            raise RuntimeError(
+                "DS3231 not found on I2C bus at %d" % DS3231_I2C_ADDR)
 
     def get_time(self, set_rtc=False):
         if set_rtc:
@@ -96,10 +97,12 @@ class DS3231:
             self.ds3231.writeto_mem(
                 DS3231_I2C_ADDR, 5, tobytes(dec2bcd(MM) | 0b10000000)
             )  # Century bit
-            self.ds3231.writeto_mem(DS3231_I2C_ADDR, 6, tobytes(dec2bcd(YY - 2000)))
+            self.ds3231.writeto_mem(
+                DS3231_I2C_ADDR, 6, tobytes(dec2bcd(YY - 2000)))
         else:
             self.ds3231.writeto_mem(DS3231_I2C_ADDR, 5, tobytes(dec2bcd(MM)))
-            self.ds3231.writeto_mem(DS3231_I2C_ADDR, 6, tobytes(dec2bcd(YY - 1900)))
+            self.ds3231.writeto_mem(
+                DS3231_I2C_ADDR, 6, tobytes(dec2bcd(YY - 1900)))
 
     # Wait until DS3231 seconds value changes before reading and returning data
     def await_transition(self):
@@ -118,7 +121,8 @@ class DS3231:
     def rtc_test(self, runtime=600, ppm=False, verbose=True):
         if rtc is None:
             raise RuntimeError("machine.RTC does not exist")
-        verbose and print("Waiting {} minutes for result".format(runtime // 60))
+        verbose and print(
+            "Waiting {} minutes for result".format(runtime // 60))
         factor = 1_000_000 if ppm else 114_155_200  # seconds per year
 
         self.await_transition()  # Start on transition of DS3231. Record time in .timebuf
@@ -127,7 +131,8 @@ class DS3231:
         while ss == rtc.datetime()[6]:
             pass
         ds = utime.ticks_diff(utime.ticks_ms(), t)  # ms to transition of RTC
-        ds3231_start = utime.mktime(self.convert())  # Time when transition occurred
+        # Time when transition occurred
+        ds3231_start = utime.mktime(self.convert())
         t = rtc.datetime()
         rtc_start = utime.mktime(
             (t[0], t[1], t[2], t[4], t[5], t[6], t[3] - 1, 0)
@@ -141,7 +146,8 @@ class DS3231:
         while ss == rtc.datetime()[6]:
             pass
         de = utime.ticks_diff(utime.ticks_ms(), t)  # ms to transition of RTC
-        ds3231_end = utime.mktime(self.convert())  # Time when transition occurred
+        # Time when transition occurred
+        ds3231_end = utime.mktime(self.convert())
         t = rtc.datetime()
         rtc_end = utime.mktime(
             (t[0], t[1], t[2], t[4], t[5], t[6], t[3] - 1, 0)
@@ -152,7 +158,8 @@ class DS3231:
         ratio = (d_ds3231 - d_rtc) / d_ds3231
         ppm = ratio * 1_000_000
         verbose and print(
-            "DS3231 leads RTC by {:4.1f}ppm {:4.1f}mins/yr".format(ppm, ppm * 1.903)
+            "DS3231 leads RTC by {:4.1f}ppm {:4.1f}mins/yr".format(
+                ppm, ppm * 1.903)
         )
         return ratio * factor
 

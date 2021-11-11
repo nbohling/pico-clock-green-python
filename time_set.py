@@ -43,7 +43,8 @@ class TimeSet(App):
         self.state_index = -1
         self.flash_count = 0
         self.flash_state = False
-        scheduler.schedule("time-set-half-second", 500, self.half_secs_callback)
+        scheduler.schedule("time-set-half-second", 500,
+                           self.half_secs_callback)
         scheduler.schedule("time-set-minute", 60000, self.mins_callback)
         self.initialise_states()
 

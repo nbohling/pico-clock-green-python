@@ -19,9 +19,12 @@ class Apps:
         self.buttons = Buttons(scheduler)
         self.apps = []
         self.current_app = 0
+        # Short press to go to the next app
         self.buttons.add_callback(1, self.next, max=500)
-        self.buttons.add_callback(1, self.previous, min=500)
-        self.buttons.add_callback(1, self.exit, min=500)
+        # Short press to go to the next app
+        self.buttons.add_callback(1, self.previous, min=500, max=1000)
+        # Really long press to "exit"
+        self.buttons.add_callback(1, self.exit, min=1000)
 
     def add(self, app):
         if len(self.apps) == 0:
@@ -54,6 +57,7 @@ class Apps:
             self.apps[self.current_app].enable()
 
     def exit(self, t):
+        print("EXIT")
         if len(self.apps) > 0:
             self.apps[self.current_app].disable()
             self.current_app = 0
