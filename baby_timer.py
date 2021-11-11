@@ -56,7 +56,7 @@ class BabyTimer:
 
     # This simply updates the display
     def time_increment_callback(self, t):
-        if self.enabled and self.started:
+        if self.enabled:
             self.update_display()
 
     # Runs when the start button is pressed
@@ -82,8 +82,9 @@ class BabyTimer:
 
     # Display current state and time
     def update_display(self):
-        t = self.state_string() + "%02d:%02d" % (self.current_duration //
-                                                 3600, (self.current_duration/60) % 60)
+        current_duration = _elapsed_time()
+        t = self.state_string() + "%02d:%02d" % (current_duration //
+                                                 3600, (current_duration/60) % 60)
         self.display.show_text(t)
 
     def state_string(self):
