@@ -1,12 +1,11 @@
 import time
-import enum
 
 from apps import App
 from buttons import Buttons
 from display import Display
 
 
-class BabyState(enum.Enum):
+class BabyState:
     awake = 0
     asleep = 1
 
