@@ -22,9 +22,9 @@ class BabyTimer:
         self.scheduler = scheduler
         self.buttons = Buttons()
 
-        self.switcher = {
-            BabyState.awake: "*",
-            BabyState.asleep: "-"
+        self.state_icons = {
+            BabyState.awake: "CountUp",
+            BabyState.asleep: "CountDown"
         }
         self.state = BabyState.awake
         self.total_duration = {
@@ -32,12 +32,14 @@ class BabyTimer:
             BabyState.asleep: 0
         }
         self.last_reset_time = time.time()
+        self.last_displayed_text = ""
+        self.last_displayed_state = None
 
         self.enabled = False
         self.started = False
 
         # Callback that drives update
-        scheduler.schedule("time-second", 1000, self.time_increment_callback)
+        scheduler.schedule("time-second", 1000, self.update_display_callback)
 
     def enable(self):
         self.enabled = True
@@ -49,13 +51,15 @@ class BabyTimer:
         self.started = False
 
     def start(self):
+        print("Timer Started")
         self.started = True
 
     def stop(self):
+        print("Timer Stopped")
         self.started = False
 
     # This simply updates the display
-    def time_increment_callback(self, t):
+    def update_display_callback(self, t):
         if self.enabled:
             self.update_display()
 
@@ -70,10 +74,14 @@ class BabyTimer:
         if self.started:
             self.total_duration[self.state] += self._elapsed_time()
             self.state = self._next_state()
+            print("Switched state")
 
-        # Mark as started
+        # Reset clock and ensure it's marked as started
         self.started = True
         self.last_reset_time = time.time()
+
+        # Force a display update to get immediate state reflection
+        self.update_display()
 
     def stop_callback(self, t):
         print("Stop pressed")
@@ -85,13 +93,30 @@ class BabyTimer:
     # Display current state and time
     def update_display(self):
         current_duration = self._elapsed_time()
-        t = self.state_string() + "%01d:%02d" % (current_duration //
-                                                 3600, (current_duration/60) % 60)
-        self.display.show_text(t)
-        print(t)
+        t = "%02d:%02d" % (current_duration //
+                           3600, (current_duration/60) % 60)
+        if t != self.last_displayed_text:
+            print("Text changed " + t + " : " + self.last_displayed_text)
+            self.display.show_text(t)
+            self.last_displayed_text = t
 
-    def state_string(self):
-        return self.switcher.get(self.state)
+        # Update icons
+        if self.state != self.last_displayed_state:
+            if self.last_displayed_state != None:
+                self.display.hide_icon(
+                    self.state_icons[self.last_displayed_state])
+            self.display.show_icon(self.state_icons[self.state])
+            self.last_displayed_state = self.state
+
+        self.flash_colon()
+
+    def flash_colon(self):
+        if self.enabled and self.started:
+            t = time.time()
+            if t % 2 == 0:
+                self.display.show_char(":", pos=10)
+            else:
+                self.display.show_char(" :", pos=10)
 
     def _next_state(self):
         if self.state == BabyState.awake:
