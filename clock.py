@@ -5,8 +5,8 @@ from rtc import RTC
 
 
 class Clock(App):
-    def __init__(self, scheduler):
-        App.__init__(self, "Clock", "clock")
+    def __init__(self, scheduler, logger):
+        App.__init__(self, "Clock", "clock", logger)
         self.display = Display(scheduler)
         self.rtc = RTC()
         self.enabled = True

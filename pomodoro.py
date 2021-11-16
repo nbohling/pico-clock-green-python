@@ -5,9 +5,9 @@ from display import Display
 from speaker import Speaker
 
 
-class Pomodoro:
-    def __init__(self, scheduler):
-        App.__init__(self, "Pomodoro", "pomod")
+class Pomodoro(App):
+    def __init__(self, scheduler, logger):
+        App.__init__(self, "Pomodoro", "pomod", logger)
         self.display = Display(scheduler)
         self.speaker = Speaker(scheduler)
         self.scheduler = scheduler

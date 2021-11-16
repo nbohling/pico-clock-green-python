@@ -10,14 +10,14 @@ class BabyState:
     asleep = 1
 
 
-class BabyTimer:
+class BabyTimer(App):
     # BabyTimer has 2 states - AWAKE and ASLEEP, and once started,
     # it adds time to whichever timer is active.
     # Pressing button A will note the time and switch states, starting to count
     # for the next state.
     # Pressing button B will reset both counters to zero
-    def __init__(self, scheduler):
-        App.__init__(self, "Baby Timer", "babytimer")
+    def __init__(self, scheduler, logger):
+        App.__init__(self, "Baby Timer", "babytimer", logger)
         self.display = Display(scheduler)
         self.scheduler = scheduler
         self.buttons = Buttons()
@@ -44,28 +44,30 @@ class BabyTimer:
     def enable(self):
         self.enabled = True
         self.buttons.add_callback(2, self.start_callback, max=500)
-        self.buttons.add_callback(3, self.stop_callback, max=500)
+        # self.buttons.add_callback(3, self.stop_callback, max=500)
 
     def disable(self):
         self.enabled = False
         self.started = False
+        self.buttons.remove_callback(2, self.start_callback, max=500)
+        # self.buttons.remove_callback(3, self.stop_callback, max=500)
 
     def start(self):
-        print("Timer Started")
+        self.log("Timer Started")
         self.started = True
 
     def stop(self):
-        print("Timer Stopped")
+        self.log("Timer Stopped")
         self.started = False
 
     # This simply updates the display
-    def update_display_callback(self, t):
+    def update_display_callback(self, _t):
         if self.enabled:
             self.update_display()
 
     # Runs when the start button is pressed
-    def start_callback(self, t):
-        print("Start pressed")
+    def start_callback(self, _t):
+        self.log("Start pressed")
         # If not enabled, don't do anything
         if not self.enabled:
             return None
@@ -74,17 +76,18 @@ class BabyTimer:
         if self.started:
             self.total_duration[self.state] += self._elapsed_time()
             self.state = self._next_state()
-            print("Switched state")
+            # Reset time zero
+            self.log("Switched state")
 
-        # Reset clock and ensure it's marked as started
         self.started = True
         self.last_reset_time = time.time()
 
         # Force a display update to get immediate state reflection
         self.update_display()
 
-    def stop_callback(self, t):
-        print("Stop pressed")
+    # Stops
+    def stop_callback(self, _t):
+        self.log("Stop pressed")
         self.started = False
 
     def _elapsed_time(self):
@@ -95,8 +98,9 @@ class BabyTimer:
         current_duration = self._elapsed_time()
         t = "%02d:%02d" % (current_duration //
                            3600, (current_duration/60) % 60)
+
+        # Display time
         if t != self.last_displayed_text:
-            print("Text changed " + t + " : " + self.last_displayed_text)
             self.display.show_text(t)
             self.last_displayed_text = t
 

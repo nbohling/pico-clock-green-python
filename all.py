@@ -5,7 +5,7 @@ from buttons import Buttons
 from display import Display
 
 
-class All:
+class All(App):
     iconList = [
         "MoveOn",
         "AlarmOn",
@@ -26,7 +26,8 @@ class All:
         "Sun",
     ]
 
-    def __init__(self, scheduler):
+    def __init__(self, scheduler, logger):
+        App.__init__(self, scheduler, logger)
         self.enabled = False
         self.started = False
         self.buttons = Buttons()
