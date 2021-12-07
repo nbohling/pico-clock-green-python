@@ -36,29 +36,23 @@ class BabyTimer(App):
         self.last_displayed_state = None
 
         self.enabled = False
-        self.started = False
+
+        self.grab_top_button = True
 
         # Callback that drives update
         scheduler.schedule("time-second", 1000, self.update_display_callback)
 
     def enable(self):
         self.enabled = True
+        self.active = True
         self.buttons.add_callback(2, self.start_callback, max=500)
-        # self.buttons.add_callback(3, self.stop_callback, max=500)
+        self.buttons.add_callback(3, self.remove_time, max=500)
 
     def disable(self):
         self.enabled = False
-        self.started = False
+        self.active = False
         self.buttons.remove_callback(2, self.start_callback, max=500)
         # self.buttons.remove_callback(3, self.stop_callback, max=500)
-
-    def start(self):
-        self.log("Timer Started")
-        self.started = True
-
-    def stop(self):
-        self.log("Timer Stopped")
-        self.started = False
 
     # This simply updates the display
     def update_display_callback(self, _t):
@@ -72,23 +66,34 @@ class BabyTimer(App):
         if not self.enabled:
             return None
 
-        # Log time and switch state if already running
-        if self.started:
-            self.total_duration[self.state] += self._elapsed_time()
-            self.state = self._next_state()
-            # Reset time zero
-            self.log("Switched state")
+        self.total_duration[self.state] += self._elapsed_time()
+        self.state = self._next_state()
+        # Reset time zero
+        self.log("Switched state")
 
-        self.started = True
         self.last_reset_time = time.time()
 
         # Force a display update to get immediate state reflection
         self.update_display()
 
-    # Stops
-    def stop_callback(self, _t):
-        self.log("Stop pressed")
-        self.started = False
+    def top_button(self, _t):
+        self.add_time()
+
+    def add_time(self):
+        # Move the reset clock back 1 minute
+        self.last_reset_time = self.last_reset_time - 60
+
+        # Force a display update to get immediate state reflection
+        self.update_display()
+
+
+    def remove_time(self, _t):
+        # Move the reset clock forward 1 minute
+        new_reset_time = self.last_reset_time + 60
+        if new_reset_time < time.time():
+            self.last_reset_time = new_reset_time
+            # Force a display update to get immediate state reflection
+            self.update_display()
 
     def _elapsed_time(self):
         return time.time() - self.last_reset_time
@@ -115,7 +120,7 @@ class BabyTimer(App):
         self.flash_colon()
 
     def flash_colon(self):
-        if self.enabled and self.started:
+        if self.enabled:
             t = time.time()
             if t % 2 == 0:
                 self.display.show_char(":", pos=10)

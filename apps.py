@@ -41,10 +41,16 @@ class Apps:
             return
 
         app = self.apps[self.current_app]
+        if app.active:
+            print ("Active!")
+        if app.grab_top_button:
+            print ("Grab top button")
         if app.active and app.grab_top_button:
+            print("Calling top button")
             app.top_button(t)
             return
 
+        print("Didn't call top button")
         self.apps[self.current_app].disable()
         self.buttons.clear_callbacks(2)
         self.buttons.clear_callbacks(3)
